@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ../../
+      dockerfile: code/deployment/api/Dockerfile
+    container_name: fastapi-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../models:/app/models       
+      - ../datasets:/app/datasets  
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: ./app  
+    container_name: streamlit-app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    environment:
+      - API_URL=http://fastapi-service:8000
+    volumes:
+      - ../models:/app/models      
+      - ../datasets:/app/datasets   
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
